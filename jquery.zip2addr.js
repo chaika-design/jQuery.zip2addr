@@ -9,7 +9,17 @@
  * Depends:
  *  jQuery 1.4 or above
  */
-$.fn.zip2addr = function(target){
+$.fn.zip2addr = function(options) {
+  var target;
+
+  var setting = (function(options) {
+    if(typeof options != 'object') {
+      target = {addr: options};
+    } else {
+      target = jQuery.extend({}, jQuery.fn.zip2addr.defaults, options);
+    }
+  })(options);
+
   var c = {
     api: location.protocol + '//www.google.com/transliterate?langpair=ja-Hira|ja&jsonp=?',
     prefectureToken: '(東京都|道|府|県)',
@@ -29,7 +39,7 @@ $.fn.zip2addr = function(target){
   };
 
   var fillAddr = (function() {
-    if(typeof target == 'object' && target.pref) {
+    if(target.pref) {
       var $addr = $(target.addr);
       var $pref = $(target.pref);
       return function(addr){
@@ -73,7 +83,7 @@ $.fn.zip2addr = function(target){
     var val = fascii2ascii(_val).replace(/\D/g,'');
     if(val.length == 7) {
       if(cache[val] == undefined) {
-        getAddr(val.replace(/(\d\d\d)(\d\d\d\d)/,'$1-$2'),function(json) {
+        getAddr(val.replace(/(\d\d\d)(\d\d\d\d)/,'$1-$2'), function(json) {
           cache[val] = json;
           fillAddr(json);
         });
@@ -85,7 +95,7 @@ $.fn.zip2addr = function(target){
 
   this.each(function() {
     var $t = $(this);
-    if(typeof target == 'object' && target.zip2) {
+    if(target.zip2) {
       var $zip2 = $(target.zip2);
       $t.add($zip2).on('keyup.zip2addr change.zip2addr', function() {
         check($t.val()+''+$zip2.val());
@@ -107,5 +117,9 @@ $.fn.zip2addr = function(target){
 
   return this;
 };
-
+$.fn.zip2addr.defaults = {
+  zip2: null,
+  addr: null,
+  pref: null
+};
 $.fn.zip2addr.cache = {};
