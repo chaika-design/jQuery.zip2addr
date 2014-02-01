@@ -29,13 +29,16 @@ $.fn.zip2addr = function(options) {
   var cache = $.fn.zip2addr.cache;
 
   var getAddr = function (zip,callback) {
-    $.getJSON(c.api,{'text':zip},
-      function(json) {
-        if(RegExp(c.prefectureToken).test(json[0][1][0])){
-          callback(json[0][1][0].replace(RegExp('(.*?'+c.prefectureToken+')(.+)'), function(a,b,c,d){return [b,d];}));
-        }
-      }
-    );
+    var defer = jQuery.Deferred();
+    jQuery.ajax({
+      url: c.api,
+      data: {'text':zip},
+      dataType: 'json',
+      type: 'get',
+      success: defer.resolve,
+      error: defer.reject
+    });
+    return defer.promise();
   };
 
   var fillAddr = (function() {
@@ -83,9 +86,15 @@ $.fn.zip2addr = function(options) {
     var val = fascii2ascii(_val).replace(/\D/g,'');
     if(val.length == 7) {
       if(cache[val] == undefined) {
-        getAddr(val.replace(/(\d\d\d)(\d\d\d\d)/,'$1-$2'), function(json) {
-          cache[val] = json;
-          fillAddr(json);
+        getAddr( val.replace(/(\d\d\d)(\d\d\d\d)/,'$1-$2') ).done(function(json) {
+          console.log(json);
+          if(RegExp(c.prefectureToken).test(json[0][1][0])) {
+            var v = json[0][1][0].replace( RegExp('(.*?'+c.prefectureToken+')(.+)'), function(a,b,c,d){return [b,d];} );
+            cache[val] = v;
+            fillAddr(v);
+          }
+        }).fail(function( jqXHR, textStatus, errorThrown ) {
+          console.log('Ajax Error', jqXHR, textStatus, errorThrown);
         });
       } else {
         fillAddr(cache[val]);
