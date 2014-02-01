@@ -4,10 +4,10 @@
  * Copyright 2010, Kotaro Kokubo a.k.a kotarok kotaro@nodot.jp
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
+ * Orign:
  * https://github.com/kotarok/jQuery.zip2addr
- *
- * Depends:
- *  jQuery 1.4 or above
+ * Fork:
+ * https://github.com/chaika-design/jQuery.zip2addr
  */
 $.fn.zip2addr = function(options) {
   var target;
@@ -29,7 +29,6 @@ $.fn.zip2addr = function(options) {
   var cache = $.fn.zip2addr.cache;
 
   var getAddr = function (zip) {
-    console.log(zip);
     var defer = jQuery.Deferred();
     jQuery.ajax({
       url: c.api,
@@ -109,17 +108,20 @@ $.fn.zip2addr = function(options) {
       $t.add($zip2).on('keyup.zip2addr change.zip2addr', function() {
         check($t.val()+''+$zip2.val());
       }).on('blur.zip2addr', function() {
-        $(this).val(function() {
-          return fascii2ascii($(this).val());
-        });
+        var $inp = $(this),
+            val = $inp.val();
+        if(val.length === 7) {
+          $inp.val( fascii2ascii(val) );
+        }
       });
     } else {
       $t.on('keyup.zip2addr change.zip2addr', function() {
         check($t.val());
       }).on('blur.zip2addr',function() {
-        $t.val(function(){
-          return fascii2ascii($t.val()).replace(/\D/g,'').replace(/(\d\d\d)(\d\d\d\d)/,'$1'+c.zipDelimiter+'$2');
-        });
+        var val = $t.val();
+        if(val.length === 7) {
+          $t.val( fascii2ascii(val).replace(/\D/g,'').replace(/(\d\d\d)(\d\d\d\d)/,'$1'+c.zipDelimiter+'$2') );
+        }
       });
     }
   });
