@@ -28,7 +28,8 @@ $.fn.zip2addr = function(options) {
 
   var cache = $.fn.zip2addr.cache;
 
-  var getAddr = function (zip,callback) {
+  var getAddr = function (zip) {
+    console.log(zip);
     var defer = jQuery.Deferred();
     jQuery.ajax({
       url: c.api,
@@ -87,7 +88,6 @@ $.fn.zip2addr = function(options) {
     if(val.length == 7) {
       if(cache[val] == undefined) {
         getAddr( val.replace(/(\d\d\d)(\d\d\d\d)/,'$1-$2') ).done(function(json) {
-          console.log(json);
           if(RegExp(c.prefectureToken).test(json[0][1][0])) {
             var v = json[0][1][0].replace( RegExp('(.*?'+c.prefectureToken+')(.+)'), function(a,b,c,d){return [b,d];} );
             cache[val] = v;
@@ -116,7 +116,7 @@ $.fn.zip2addr = function(options) {
     } else {
       $t.on('keyup.zip2addr change.zip2addr', function() {
         check($t.val());
-      }).on('blur.zip2addr',function(){
+      }).on('blur.zip2addr',function() {
         $t.val(function(){
           return fascii2ascii($t.val()).replace(/\D/g,'').replace(/(\d\d\d)(\d\d\d\d)/,'$1'+c.zipDelimiter+'$2');
         });
